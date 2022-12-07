@@ -1,6 +1,8 @@
 import openai
-from PIL import Image, ImageGrid
+from PIL import Image, ImageDraw, ImageFont
 import os
+import requests
+from io import BytesIO
 from dotenv import load_dotenv
 
 # Set the OpenAI API key
@@ -18,29 +20,22 @@ response = openai.Image.create(
     response_format="url"
 )
 
+# Print the URLs of the generated images
 print("Generated images:")
 for i, image in enumerate(response["data"]):
-    # Print the URLs of the generated images
     print(f"{i + 1}. {image['url']}")
-    # Open the images urls using the pillow library 
-    ims = Image.open(image['url'])
 
-# Create an ImageGrid instance with the images and the desired grid size
-grid = ImageGrid(ims, nrows=2, ncols=2)
+#Get the URLs of the generated images
+image_urls = [image["url"] for image in response["data"]]
 
-# Prompt the user to choose an image
-#selected_image = int(input("Choose an image (1-4): "))
+images = []
+for image_url in image_urls:
+    # Open the image using the requests library
+    response = requests.get(image_url)
 
-# Use the selected image as the prompt for the next round of image generation
-#selected_prompt = response["data"][selected_image - 1]["prompt"]
-#response = openai.Image.create(
-    #prompt=selected_prompt,
-    #n=4,
-    #size="512x512",
-    #response_format="url"
-#)
+    # Create a Pillow Image object from the image data
+    images.append(Image.open(BytesIO(response.content)))
 
-## Print the URLs of the second round of generated images
-#print("Generated images:")
-#for i, image in enumerate(response["data"]):
-    #print(f"{i + 1}. {image['url']}")
+# Show the images
+for image in images:
+    image.show()
