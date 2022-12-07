@@ -1,4 +1,6 @@
 import openai
+from PIL import Image, ImageGrid
+import os
 from dotenv import load_dotenv
 
 # Set the OpenAI API key
@@ -12,14 +14,19 @@ prompt = input("Enter a prompt to generate images: ")
 response = openai.Image.create(
     prompt=prompt,
     n=4,
-    size="512x512",
+    size="1024x1024",
     response_format="url"
 )
 
-# Print the URLs of the generated images
 print("Generated images:")
 for i, image in enumerate(response["data"]):
+    # Print the URLs of the generated images
     print(f"{i + 1}. {image['url']}")
+    # Open the images urls using the pillow library 
+    ims = Image.open(image['url'])
+
+# Create an ImageGrid instance with the images and the desired grid size
+grid = ImageGrid(ims, nrows=2, ncols=2)
 
 # Prompt the user to choose an image
 #selected_image = int(input("Choose an image (1-4): "))
